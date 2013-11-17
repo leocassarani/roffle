@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+Bundler.setup(:default)
+
+require 'roffle/cli'
+
+Roffle::Cli.run(ARGV)
