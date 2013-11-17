@@ -1,5 +1,3 @@
-require 'ruby_parser'
-
 module Roffle
   class ExtractMethod
     def self.short_name
@@ -14,37 +12,27 @@ module Roffle
 
     def initialize(source)
       @source = source
-      @sexp = parse(source.path)
+      @sexp = Parser.parse(source.path)
     end
 
     def apply(new_name)
       new_name = new_name.to_sym
-      to_extract = sexp_at_line(source.line)
-      replacement = s(:call, nil, new_name)
-      remainder = sexp_replace(sexp, to_extract, replacement)
 
-      s(:block, remainder,
-        s(:defn, new_name, s(:args), *to_extract))
+      source_map = SourceMap.new(sexp)
+      extracted = source_map.at_line(source.line)
+
+      s(:block, sexp_replace(sexp, extracted, method_call(new_name)),
+        s(:defn, new_name, s(:args), *extracted))
     end
 
     private
 
-    def parse(path)
-      file = File.read(path)
-      parser = RubyParser.for_current_ruby
-      parser.parse(file, path)
-    end
-
-    def sexp_at_line(line)
-      match = []
-      sexp.each_sexp do |s|
-        match << s if s.line == line
-      end
-      match
-    end
-
     def sexp_replace(sexp, before, after)
-      sexp = sexp.sub(before.first, after)
+      sexp.sub(before.first, after)
+    end
+
+    def method_call(name)
+      s(:call, nil, name)
     end
 
     def s(*args)

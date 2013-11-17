@@ -1,6 +1,12 @@
 require 'roffle'
 
 module Roffle
+  module RubyWriter
+    def self.to_ruby(sexp)
+      sexp.inspect
+    end
+  end
+
   class Cli
     BINARY_NAME = "roffle"
 
@@ -15,7 +21,8 @@ module Roffle
 
       case refactoring
       when ExtractMethod.short_name
-        ExtractMethod.apply(source, *options)
+        output = ExtractMethod.apply(source, *options)
+        puts RubyWriter.to_ruby(output)
       else
         puts "#{BINARY_NAME}: '#{refactoring}' is not a valid refactoring."
         exit 1
