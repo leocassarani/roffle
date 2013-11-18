@@ -8,7 +8,7 @@ module Roffle
       new(source).apply(new_name)
     end
 
-    attr_reader :source, :sexp
+    attr_reader :source
 
     def initialize(source)
       @source = source
@@ -17,26 +17,38 @@ module Roffle
 
     def apply(new_name)
       new_name = new_name.to_sym
+      lines = source.lines
 
-      source_map = SourceMap.new(sexp)
-      extracted = source_map.at_line(source.line)
+      source_map = SourceMap.new(@sexp)
+      extracted = source_map.at_lines(lines)
 
-      s(:block, sexp_replace(sexp, extracted, method_call(new_name)),
+      s(:block, replace(lines, method_call(new_name)),
         s(:defn, new_name, s(:args), *extracted))
     end
 
     private
 
-    def sexp_replace(sexp, before, after)
-      sexp.sub(before.first, after)
+    def replace(lines, after)
+      replaced = false
+
+      ary = @sexp.inject([]) do |acc, obj|
+        if Sexp === obj && lines.include?(obj.line)
+          if replaced
+            acc
+          else
+            replaced = true
+            acc + [after]
+          end
+        else
+          acc + [obj]
+        end
+      end
+
+      Sexp.from_array(ary)
     end
 
     def method_call(name)
       s(:call, nil, name)
-    end
-
-    def s(*args)
-      Sexp.new(*args)
     end
   end
 end

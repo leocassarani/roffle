@@ -17,7 +17,7 @@ module Roffle
       end
 
       refactoring, file, options = args
-      source = SourceLocation.from_options_string(file)
+      source = SourceLocation.from_string(file)
 
       case refactoring
       when ExtractMethod.short_name

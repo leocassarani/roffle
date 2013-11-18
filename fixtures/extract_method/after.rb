@@ -5,4 +5,5 @@ end
 
 def print_details
   puts "name: #{@name}"
+  puts "amount: #{@amount}"
 end

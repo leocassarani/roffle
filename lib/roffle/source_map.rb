@@ -5,8 +5,8 @@ module Roffle
       @map = build(sexp)
     end
 
-    def at_line(line)
-      @map[line]
+    def at_lines(lines)
+      lines.inject([]) { |acc, line| acc + @map[line] }
     end
 
     private
