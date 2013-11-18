@@ -15,8 +15,7 @@ module Roffle
             acc
           else
             replaced = true
-            after.line = obj.line
-            acc + [after]
+            acc + wrap(after)
           end
         else
           acc + [obj]
@@ -24,6 +23,18 @@ module Roffle
       end
 
       Sexp.from_array(ary)
+    end
+
+    private
+
+    def wrap(obj)
+      if obj.is_a? Sexp
+        [obj]
+      elsif obj.is_a? Array
+        obj
+      else
+        [obj]
+      end
     end
   end
 end
