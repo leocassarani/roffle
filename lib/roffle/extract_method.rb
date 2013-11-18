@@ -1,3 +1,5 @@
+require_relative 'sexp_transformation'
+
 module Roffle
   class ExtractMethod
     def self.short_name
@@ -20,7 +22,7 @@ module Roffle
 
       lines = source.lines
       extracted = sexp_slice(lines)
-      replacement = sexp_replace(lines, method_call(new_name))
+      replacement = replace_with_method_call(lines, new_name)
 
       s(:block, replacement,
         s(:defn, new_name, s(:args), *extracted))
@@ -33,24 +35,9 @@ module Roffle
       source_map.at_lines(lines)
     end
 
-    def sexp_replace(lines, after)
-      replaced = false
-
-      ary = sexp.inject([]) do |acc, obj|
-        if Sexp === obj && lines.include?(obj.line)
-          if replaced
-            acc
-          else
-            replaced = true
-            after.line = obj.line
-            acc + [after]
-          end
-        else
-          acc + [obj]
-        end
-      end
-
-      Sexp.from_array(ary)
+    def replace_with_method_call(lines, method)
+      t = SexpTransformation.new(sexp)
+      t.replace_lines(lines, method_call(method))
     end
 
     def method_call(name)
