@@ -42,6 +42,7 @@ module Roffle
             acc
           else
             replaced = true
+            after.line = obj.line
             acc + [after]
           end
         else
