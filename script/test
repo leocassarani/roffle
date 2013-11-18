@@ -1,3 +1,11 @@
 #!/usr/bin/env bash
 
-bundle exec turn spec
+set -e
+
+exec="bundle exec"
+
+if [[ $# -gt 0 ]]; then
+  $exec ruby -Ilib $1
+else
+  $exec rake test
+fi
