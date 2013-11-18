@@ -1,5 +1,14 @@
 def print_owing
-  print_banner
+  outstanding = 0.0
+
+  puts "*************************"
+  puts "***** Customer Owes *****"
+  puts "*************************"
+
+  @orders.each do |order|
+    outstanding += order.amount
+  end
+
   puts "name: #{@name}"
-  puts "amount: #{@amount}"
+  puts "amount: #{outstanding}"
 end
