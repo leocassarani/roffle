@@ -4,34 +4,39 @@ module Roffle
       'extract-method'
     end
 
-    def self.apply(source, new_name)
-      new(source).apply(new_name)
+    def self.apply(sexp, source, new_name)
+      new(sexp, source).apply(new_name)
     end
 
-    attr_reader :source
+    attr_reader :source, :sexp
 
-    def initialize(source)
+    def initialize(sexp, source)
+      @sexp = sexp
       @source = source
-      @sexp = Parser.parse(source.path)
     end
 
     def apply(new_name)
       new_name = new_name.to_sym
+
       lines = source.lines
+      extracted = sexp_slice(lines)
+      replacement = sexp_replace(lines, method_call(new_name))
 
-      source_map = SourceMap.new(@sexp)
-      extracted = source_map.at_lines(lines)
-
-      s(:block, replace(lines, method_call(new_name)),
+      s(:block, replacement,
         s(:defn, new_name, s(:args), *extracted))
     end
 
     private
 
-    def replace(lines, after)
+    def sexp_slice(lines)
+      source_map = SourceMap.new(sexp)
+      source_map.at_lines(lines)
+    end
+
+    def sexp_replace(lines, after)
       replaced = false
 
-      ary = @sexp.inject([]) do |acc, obj|
+      ary = sexp.inject([]) do |acc, obj|
         if Sexp === obj && lines.include?(obj.line)
           if replaced
             acc

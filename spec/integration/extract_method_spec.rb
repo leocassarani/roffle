@@ -15,9 +15,8 @@ describe "Extract Method" do
   it "extracts methods with no local variables" do
     before = fixture_path('extract_method/before.rb')
     after  = fixture_path('extract_method/after.rb')
-
     source = Roffle::SourceLocation.new(before, 3..4)
-    sexp = Roffle::ExtractMethod.apply(source, "print_details")
-    sexp.must_equal file_to_sexp(after)
+    output = Roffle::ExtractMethod.apply(file_to_sexp(before), source, "print_details")
+    output.must_equal file_to_sexp(after)
   end
 end
