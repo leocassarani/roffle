@@ -1,6 +1,3 @@
-require_relative 'sexp_transformation'
-require_relative 'sexp_tree'
-
 module Roffle
   class ExtractMethod
     def self.short_name
@@ -56,8 +53,8 @@ module Roffle
     end
 
     def method_definition(name, args, body)
-      args_sexp = Sexp.from_array([:args] + args.map(&:last))
-      s(:defn, name, args_sexp, *body)
+      args_names = args.map(&:last)
+      SexpBuilder.method_def(name, args_names, body)
     end
   end
 end
