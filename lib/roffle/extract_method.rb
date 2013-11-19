@@ -1,4 +1,5 @@
 require_relative 'sexp_transformation'
+require_relative 'sexp_tree'
 
 module Roffle
   class ExtractMethod
@@ -37,17 +38,8 @@ module Roffle
     end
 
     def unbound_locals(sexp)
-      locals = []
-      if sexp.is_a? Sexp
-        sexp.each_of_type(:lvar) do |s|
-          locals << s.last
-        end
-        return locals
-      else
-        sexp.inject([]) do |memo, obj|
-          memo + unbound_locals(obj)
-        end
-      end
+      tree = SexpTree.new(sexp)
+      tree.search(type: :lvar)
     end
 
     def replace_with_method_call(lines, method, locals)
@@ -58,13 +50,13 @@ module Roffle
     def method_call(name, args)
       sexp = s(:call, nil, name)
       if args.any?
-        sexp += args.map { |a| s(:lvar, a) }
+        sexp += args
       end
       Sexp.from_array(sexp)
     end
 
     def method_definition(name, args, body)
-      args_sexp = Sexp.from_array([:args] + args)
+      args_sexp = Sexp.from_array([:args] + args.map(&:last))
       s(:defn, name, args_sexp, *body)
     end
   end
