@@ -39,7 +39,7 @@ module Roffle
 
     def unbound_locals(sexp)
       tree = SexpTree.new(sexp)
-      tree.search(type: :lvar)
+      tree.all_with_type(:lvar)
     end
 
     def replace_with_method_call(lines, method, locals)
