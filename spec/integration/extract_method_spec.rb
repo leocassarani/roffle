@@ -19,4 +19,12 @@ describe "Extract Method" do
     output = Roffle::ExtractMethod.apply(file_to_sexp(before), source, "print_banner")
     output.must_equal file_to_sexp(after)
   end
+
+  it "extracts methods with local variables" do
+    before = fixture_path('extract_method/locals/before.rb')
+    after  = fixture_path('extract_method/locals/after.rb')
+    source = Roffle::SourceLocation.new(before, 3..3)
+    output = Roffle::ExtractMethod.apply(file_to_sexp(before), source, "print_details")
+    output.must_equal file_to_sexp(after)
+  end
 end

@@ -6,18 +6,24 @@ module Roffle
     end
 
     def at_lines(lines)
-      lines.inject([]) { |acc, line| acc + @map[line] }
+      lines.inject([]) do |acc, line|
+        acc + wrap(@map[line])
+      end
     end
 
     private
 
     def build(sexp)
       # wtb inject
-      map = Hash.new { |h, k| h[k] = [] }
+      map = {}
       sexp.each_sexp do |s|
-        map[s.line] << s
+        map[s.line] ||= s
       end
       map
+    end
+
+    def wrap(obj)
+      obj.nil? ? [] : [obj]
     end
   end
 end
