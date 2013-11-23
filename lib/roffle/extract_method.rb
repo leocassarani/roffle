@@ -23,12 +23,12 @@ module Roffle
     # Returns a Sexp that has been refactored using Extract Method.
     def apply(name)
       lines       = source.lines
-      extracted   = slice_sexp(lines)
-      locals      = unbound_locals(extracted)
-      replacement = replace_with_method_call(lines, name, locals)
-      method_defn = method_defn(name, locals, extracted)
-
-      s(:block, replacement, method_defn)
+      slice       = slice_sexp(lines)
+      locals      = unbound_locals(slice)
+      method_call = method_call(name, locals)
+      replacement = replace_lines(lines, method_call)
+      method_defn = method_defn(name, locals, slice)
+      concat(replacement, method_defn)
     end
 
     private
@@ -40,14 +40,13 @@ module Roffle
 
     def unbound_locals(sexp)
       tree = SexpTree.new(sexp)
-      lvars = tree.all_with_type(:lvar)
       # Unpack the name of each lvar: s(:lvar, :foo) -> :foo
-      lvars.map(&:last)
+      tree.all_with_type(:lvar).map(&:last)
     end
 
-    def replace_with_method_call(lines, method, locals)
+    def replace_lines(lines, replacement)
       t = SexpTransformation.new(sexp)
-      t.replace_lines(lines, method_call(method, locals))
+      t.replace_lines(lines, replacement)
     end
 
     # name: #to_sym
@@ -60,6 +59,10 @@ module Roffle
 
     def method_defn(name, args, body)
       SexpBuilder.method_defn(name, args, body)
+    end
+
+    def concat(first, second)
+      s(:block, first, second)
     end
   end
 end
