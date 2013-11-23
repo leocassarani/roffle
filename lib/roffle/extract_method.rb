@@ -4,8 +4,8 @@ module Roffle
       'extract-method'
     end
 
-    def self.apply(sexp, source, new_name)
-      new(sexp, source).apply(new_name)
+    def self.apply(sexp, source, name)
+      new(sexp, source).apply(name)
     end
 
     attr_reader :source, :sexp
@@ -15,28 +15,34 @@ module Roffle
       @source = source
     end
 
-    def apply(new_name)
-      new_name = new_name.to_sym
-
-      lines = source.lines
-      extracted = sexp_slice(lines)
-      locals = unbound_locals(extracted)
-      replacement = replace_with_method_call(lines, new_name, locals)
-      new_method = method_definition(new_name, locals, extracted)
+    # Public: Apply the Extract Method refactoring.
+    #
+    # name - An object that responds to #to_sym. Will be used as the name of
+    #        the newly-extracted method.
+    #
+    # Returns a Sexp that has been refactored using Extract Method.
+    def apply(name)
+      lines       = source.lines
+      extracted   = slice_sexp(lines)
+      locals      = unbound_locals(extracted)
+      replacement = replace_with_method_call(lines, name, locals)
+      new_method  = method_definition(name, locals, extracted)
 
       s(:block, replacement, new_method)
     end
 
     private
 
-    def sexp_slice(lines)
+    def slice_sexp(lines)
       source_map = SourceMap.new(sexp)
       source_map.at_lines(lines)
     end
 
     def unbound_locals(sexp)
       tree = SexpTree.new(sexp)
-      tree.all_with_type(:lvar)
+      lvars = tree.all_with_type(:lvar)
+      # Unpack the name of each lvar: s(:lvar, :foo) -> :foo
+      lvars.map(&:last)
     end
 
     def replace_with_method_call(lines, method, locals)
@@ -44,17 +50,16 @@ module Roffle
       t.replace_lines(lines, method_call(method, locals))
     end
 
-    def method_call(name, args)
-      sexp = s(:call, nil, name)
-      if args.any?
-        sexp += args
-      end
-      Sexp.from_array(sexp)
+    # name: #to_sym
+    # lvars: [Symbol]
+    def method_call(name, lvars)
+      # All arguments passed into our new method are local variables
+      args = lvars.map { |var| SexpBuilder.local_variable(var) }
+      SexpBuilder.self_method_call(name, args)
     end
 
     def method_definition(name, args, body)
-      args_names = args.map(&:last)
-      SexpBuilder.method_def(name, args_names, body)
+      SexpBuilder.method_def(name, args, body)
     end
   end
 end

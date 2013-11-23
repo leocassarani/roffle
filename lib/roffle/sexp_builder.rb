@@ -11,5 +11,20 @@ module Roffle
     def self.method_def_args(args)
       s(:args, *args)
     end
+
+    # name: #to_sym
+    # args: [Sexp]
+    def self.self_method_call(name, args = [])
+      if args.empty?
+        s(:call, nil, name.to_sym)
+      else
+        s(:call, nil, name.to_sym, *args)
+      end
+    end
+
+    # name: #to_sym
+    def self.local_variable(name)
+      s(:lvar, name.to_sym)
+    end
   end
 end
