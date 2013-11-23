@@ -26,9 +26,9 @@ module Roffle
       extracted   = slice_sexp(lines)
       locals      = unbound_locals(extracted)
       replacement = replace_with_method_call(lines, name, locals)
-      new_method  = method_definition(name, locals, extracted)
+      method_defn = method_defn(name, locals, extracted)
 
-      s(:block, replacement, new_method)
+      s(:block, replacement, method_defn)
     end
 
     private
@@ -58,8 +58,8 @@ module Roffle
       SexpBuilder.self_method_call(name, args)
     end
 
-    def method_definition(name, args, body)
-      SexpBuilder.method_def(name, args, body)
+    def method_defn(name, args, body)
+      SexpBuilder.method_defn(name, args, body)
     end
   end
 end
