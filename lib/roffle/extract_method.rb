@@ -38,10 +38,14 @@ module Roffle
       source_map.at_lines(lines)
     end
 
-    def unbound_locals(sexp)
-      tree = SexpTree.new(sexp)
+    def unbound_locals(slice)
+      locals = slice.inject([]) do |memo, sexp|
+        tree = SexpTree.new(sexp)
+        memo + tree.all_with_type(:lvar)
+      end
+
       # Unpack the name of each lvar: s(:lvar, :foo) -> :foo
-      tree.all_with_type(:lvar).map(&:last)
+      locals.uniq.map(&:last)
     end
 
     def replace_lines(lines, replacement)
