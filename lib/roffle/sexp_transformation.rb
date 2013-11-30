@@ -1,15 +1,15 @@
 module Roffle
   class SexpTransformation
-    attr_reader :sexp
+    attr_reader :stree
 
-    def initialize(sexp)
-      @sexp = sexp
+    def initialize(stree)
+      @stree = stree
     end
 
     def replace_lines(lines, after)
       replaced = false
 
-      ary = sexp.inject([]) do |acc, obj|
+      ary = stree.to_sexp.inject([]) do |acc, obj|
         if Sexp === obj && lines.include?(obj.line)
           if replaced
             acc
@@ -22,16 +22,17 @@ module Roffle
         end
       end
 
-      Sexp.from_array(ary)
+      SexpTree.new Sexp.from_array(ary)
     end
 
     private
 
     def wrap(obj)
-      if obj.is_a? Sexp
-        [obj]
-      elsif obj.is_a? Array
-        obj
+      case obj
+      when SexpTree
+        [obj.to_sexp]
+      when Array
+        obj.map(&:to_sexp)
       else
         [obj]
       end

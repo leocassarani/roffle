@@ -4,6 +4,11 @@ module Roffle
       'extract-method'
     end
 
+    # sexp   - The SexpTree to apply the transformation to.
+    # source - The SourceLocation of the input file.
+    # name   - The String containing the name of the method to extract.
+    #
+    # Returns a SexpTree that has been refactored using Extract Method.
     def self.apply(sexp, source, name)
       new(sexp, source).apply(name)
     end
@@ -20,7 +25,7 @@ module Roffle
     # name - An object that responds to #to_sym. Will be used as the name of
     #        the newly-extracted method.
     #
-    # Returns a Sexp that has been refactored using Extract Method.
+    # Returns a SexpTree that has been refactored using Extract Method.
     def apply(name)
       lines       = source.lines
       slice       = slice_sexp(lines)
@@ -33,15 +38,18 @@ module Roffle
 
     private
 
+    # line - Range
+    # Returns [SexpTree].
     def slice_sexp(lines)
       source_map = SourceMap.new(sexp)
       source_map.at_lines(lines)
     end
 
+    # slice - [SexpTree]
+    # Returns [Symbol].
     def unbound_locals(slice)
-      locals = slice.inject([]) do |memo, sexp|
-        tree = SexpTree.new(sexp)
-        memo + tree.all_of_type(:lvar)
+      locals = slice.inject([]) do |memo, stree|
+        memo + stree.all_of_type(:lvar)
       end
 
       # Unpack the name of each lvar: s(:lvar, :foo) -> :foo
@@ -53,8 +61,8 @@ module Roffle
       t.replace_lines(lines, replacement)
     end
 
-    # name: #to_sym
-    # lvars: [Symbol]
+    # name  - #to_sym
+    # lvars - [Symbol]
     def method_call(name, lvars)
       # All arguments passed into our new method are local variables
       args = lvars.map { |var| SexpBuilder.local_variable(var) }
@@ -66,7 +74,7 @@ module Roffle
     end
 
     def concat(first, second)
-      s(:block, first, second)
+      st(:block, first, second)
     end
   end
 end

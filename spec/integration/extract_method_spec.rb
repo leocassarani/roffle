@@ -7,8 +7,7 @@ def fixture_path(path)
 end
 
 def file_to_sexp(path)
-  parser = RubyParser.for_current_ruby
-  parser.parse(File.read(path), path)
+  Roffle::Parser.parse(path)
 end
 
 describe "Extract Method" do

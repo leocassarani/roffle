@@ -1,8 +1,7 @@
 module Roffle
   class SourceMap
-    def initialize(sexp)
-      @sexp = sexp
-      @map = build(sexp)
+    def initialize(stree)
+      @map = build(stree)
     end
 
     def at_lines(lines)
@@ -13,13 +12,11 @@ module Roffle
 
     private
 
-    def build(sexp)
-      # wtb inject
-      map = {}
-      sexp.each_sexp do |s|
-        map[s.line] ||= s
+    def build(stree)
+      stree.depth_first.inject({}) do |memo, node|
+        memo[node.line] ||= node
+        memo
       end
-      map
     end
 
     def wrap(obj)
