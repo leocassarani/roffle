@@ -17,7 +17,10 @@ describe Roffle::SexpBuilder do
     end
 
     it "returns a :defn sexp with multi-line body" do
-      body = [s(:call, nil, :puts, s(:lvar, :amount)), s(:call, nil, :puts, s(:ivar, :@name))]
+      body = [
+        s(:call, nil, :puts, s(:lvar, :amount)),
+        s(:call, nil, :puts, s(:ivar, :@name))
+      ]
       sexp = Roffle::SexpBuilder.method_defn(:print_details, [:amount], body)
       sexp.must_equal s(:defn, :print_details, s(:args, :amount), *body)
     end

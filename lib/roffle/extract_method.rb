@@ -41,11 +41,11 @@ module Roffle
     def unbound_locals(slice)
       locals = slice.inject([]) do |memo, sexp|
         tree = SexpTree.new(sexp)
-        memo + tree.all_with_type(:lvar)
+        memo + tree.all_of_type(:lvar)
       end
 
       # Unpack the name of each lvar: s(:lvar, :foo) -> :foo
-      locals.uniq.map(&:last)
+      locals.uniq.map(&:to_sexp).map(&:last)
     end
 
     def replace_lines(lines, replacement)
