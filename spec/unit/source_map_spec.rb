@@ -1,18 +1,11 @@
 require 'turn/autorun'
+require 'support/test_helpers'
 require 'sexp_processor'
 require 'roffle/sexp_tree'
 require 'roffle/source_map'
 
 describe Roffle::SourceMap do
-  def at_line(line, &block)
-    sexp = block.call
-    sexp.line = line
-    sexp
-  end
-
-  def stree(sexp)
-    Roffle::SexpTree.new(sexp)
-  end
+  include TestHelpers
 
   it "returns all sexps for a single line" do
     body = at_line(2) { s(:call, nil, :print_banner) }

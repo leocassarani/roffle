@@ -1,18 +1,11 @@
 require 'turn/autorun'
+require 'support/test_helpers'
 require 'sexp_processor'
 require 'roffle/sexp_tree'
 require 'roffle/sexp_transformation'
 
 describe Roffle::SexpTransformation do
-  def at_line(line, &block)
-    sexp = block.call
-    sexp.line = line
-    sexp
-  end
-
-  def stree(sexp)
-    Roffle::SexpTree.new(sexp)
-  end
+  include TestHelpers
 
   describe "#replace_lines" do
     it "replaces a single line with a single sexp" do

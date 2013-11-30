@@ -5,7 +5,7 @@ set -e
 exec="bundle exec"
 
 if [[ $# -gt 0 ]]; then
-  $exec ruby -Ilib $1
+  $exec ruby -Ilib -Ispec $1
 else
   $exec rake test
 fi

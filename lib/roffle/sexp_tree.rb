@@ -16,7 +16,7 @@ end
 
 module Roffle
   class SexpTree
-    attr_reader :children, :line
+    attr_reader :children
 
     def initialize(sexp)
       @sexp = sexp.to_sexp

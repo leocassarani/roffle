@@ -6,6 +6,13 @@ module Roffle
       @stree = stree
     end
 
+    # Public: Replace the given lines with the given sexp.
+    #
+    # lines - The Range of lines to be replaced.
+    # after - The SexpTree or [SexpTree] with which to replace
+    #         the target lines.
+    #
+    # Returns a SexpTree with the given lines replaced.
     def replace_lines(lines, after)
       replaced = false
 
