@@ -2,33 +2,35 @@ require 'turn/autorun'
 require 'support/test_helpers'
 require 'sexp_processor'
 require 'roffle/sexp_tree'
+require 'roffle/source_map'
 require 'roffle/sexp_transformation'
 
 describe Roffle::SexpTransformation do
   include TestHelpers
 
   describe "#replace_lines" do
-    it "replaces a single line with a single sexp" do
+    it "replaces a single, arbitrarily-nested line with a single sexp" do
       body   = at_line(2) { s(:call, nil, :puts, s(:str, "####")) }
-      method = at_line(1) { s(:defn, :print_owing, s(:args), body) }
+      method = at_line(1) { s(:defn, :print_owing, s(:args), s(:block, body)) }
 
       t = Roffle::SexpTransformation.new stree(method)
       sexp = t.replace_lines(2..2, st(:call, nil, :print_banner))
 
       sexp.must_equal st(:defn, :print_owing,
                         st(:args),
-                        st(:call, nil, :print_banner))
+                        st(:block, st(:call, nil, :print_banner)))
     end
 
     it "replaces several lines with a single sexp" do
       one    = at_line(2) { s(:call, nil, :puts, s(:str, "####")) }
       two    = at_line(3) { s(:call, nil, :puts, s(:str, "====")) }
-      method = at_line(1) { s(:defn, :print_owing, s(:args), one, two) }
+      three  = at_line(4) { s(:call, nil, :puts, s(:str, "****")) }
+      method = at_line(1) { s(:defn, :print_owing, s(:args), one, two, three) }
 
       replacement = st(:call, nil, :print_banner)
 
       t = Roffle::SexpTransformation.new stree(method)
-      sexp = t.replace_lines(2..3, replacement)
+      sexp = t.replace_lines(2..4, replacement)
 
       sexp.must_equal st(:defn, :print_owing,
                         st(:args),

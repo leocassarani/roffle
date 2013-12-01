@@ -19,14 +19,15 @@ module Roffle
 
       parent = node.parent
 
-      sexp = scope.to_sexp
-      sexp << defn
-      appended = SexpTree.new(sexp, parent)
-
       if parent
+        sexp = scope.to_sexp
+        sexp << defn
+        appended = SexpTree.new(sexp, parent)
         replace(parent, scope, appended)
       else
-        appended
+        sexp = stree.to_sexp
+        sexp << defn
+        SexpTree.new(sexp)
       end
     end
 
