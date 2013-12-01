@@ -63,6 +63,17 @@ describe Roffle::SexpTree do
     stree(sexp).sexp_type.must_equal :call
   end
 
+  it "holds a reference to its parent node" do
+    sexp = s(:call, nil, :puts, s(:str, "foo"))
+    child = stree(sexp).children.first
+    child.parent.must_equal stree(sexp)
+  end
+
+  it "returns nil if there is no parent node" do
+    sexp = s(:call, nil, :puts, s(:str, "foo"))
+    stree(sexp).parent.must_be_nil
+  end
+
   describe "#all_of_type" do
     it "returns an empty array when no matches are found" do
       sexp = s(:block, s(:lasgn, :a, s(:lit, 1.0)))

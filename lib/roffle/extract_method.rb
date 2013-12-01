@@ -27,13 +27,14 @@ module Roffle
     #
     # Returns a SexpTree that has been refactored using Extract Method.
     def apply(name)
-      lines       = source.lines
-      slice       = slice_sexp(lines)
-      locals      = unbound_locals(slice)
-      method_call = method_call(name, locals)
-      replacement = replace_lines(lines, method_call)
-      method_defn = method_defn(name, locals, slice)
-      concat(replacement, method_defn)
+      lines        = source.lines
+      slice        = slice_sexp(lines)
+      locals       = unbound_locals(slice)
+      method_call  = method_call(name, locals)
+      replaced     = replace_lines(lines, method_call)
+      parent_scope = parent_scope(slice)
+      method_defn  = method_defn(name, locals, slice)
+      append_method_defn(parent_scope, replaced, method_defn)
     end
 
     private
@@ -69,12 +70,29 @@ module Roffle
       SexpBuilder.self_method_call(name, args)
     end
 
+    # XXX: Extract
+    def parent_scope(slice)
+      stree = slice.first # XXX: non-contiguous sexp
+
+      while stree.parent
+        stree = stree.parent
+
+        if [:class, :module, :block].include? stree.sexp_type
+          return stree
+        end
+      end
+
+      # We've reached the end, and no suitable parent in sight,
+      # so we make our own -- a :block sexp node
+      SexpTree.new s(:block)
+    end
+
     def method_defn(name, args, body)
       SexpBuilder.method_defn(name, args, body)
     end
 
-    def concat(first, second)
-      st(:block, first, second)
+    def append_method_defn(scope, stree, method_defn)
+      SexpInjector.new(stree).append_method_defn(method_defn, scope)
     end
   end
 end

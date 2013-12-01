@@ -16,27 +16,16 @@ end
 
 module Roffle
   class SexpTree
-    attr_reader :children
+    attr_reader :children, :parent
 
-    def initialize(sexp)
+    def initialize(sexp, parent = nil)
       @sexp = sexp.to_sexp
+      @parent = parent
       @children = wrap_children(@sexp)
     end
 
     def to_sexp
-      @sexp
-    end
-
-    def to_a
-      to_sexp.to_a
-    end
-
-    def sexp_type
-      to_sexp.sexp_type
-    end
-
-    def line
-      to_sexp.line
+      @sexp.dup
     end
 
     def ==(obj)
@@ -49,6 +38,18 @@ module Roffle
 
     def inspect
       to_sexp.inspect
+    end
+
+    def to_a
+      to_sexp.to_a
+    end
+
+    def sexp_type
+      to_sexp.sexp_type
+    end
+
+    def line
+      to_sexp.line
     end
 
     def all_of_type(type)
@@ -87,17 +88,8 @@ module Roffle
 
     def wrap_children(sexp)
       sexp
-        .select { |s| Sexp === s || self.class === s }
-        .map { |s| wrap(s) }
-    end
-
-    def wrap(sexp)
-      case sexp
-      when Sexp
-        self.class.new(sexp)
-      else
-        sexp
-      end
+        .select { |s| s.respond_to?(:to_sexp) }
+        .map { |s| self.class.new(s, self) }
     end
   end
 end
